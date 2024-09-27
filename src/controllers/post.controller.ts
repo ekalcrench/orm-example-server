@@ -1,29 +1,26 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
-import { findSessionById } from "./session.controller";
 
+const postClient = new PrismaClient().post;
 const userClient = new PrismaClient().user;
 const sessionClient = new PrismaClient().session;
 
-export const getAllUsers = async (req, res) => {
+export const getAllPosts = async (req, res) => {
   try {
-    const user = await userClient.findMany();
+    const posts = await postClient.findMany();
 
-    res.status(200).json({ data: user });
+    res.status(200).json({ data: posts });
   } catch (error) {
     console.log(error);
   }
 };
 
-export const getUserData = async (req, res) => {
+export const getPostById = async (req, res) => {
   try {
-    const session = await findSessionById(req, res);
+    const postId = req.params.id;
+    const post = await postClient.findFirst({ where: { id: postId } });
 
-    if (!session) res.status(401).json({ message: "Unauthorized" });
-
-    const user = await userClient.findFirst({ where: { id: session.userId } });
-
-    res.status(200).json({ data: user });
+    res.status(200).json({ data: post });
   } catch (error) {
     console.log(error);
   }

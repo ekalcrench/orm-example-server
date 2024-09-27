@@ -3,6 +3,7 @@ import cors from "cors";
 
 import userRouter from "./routes/user.route";
 import sessionRouter from "./routes/session.route";
+import postRouter from "./routes/post.route";
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -14,6 +15,7 @@ app.use(express.json());
 
 app.use("/users", userRouter);
 app.use("/auth", sessionRouter);
+app.use("/posts", postRouter);
 
 app.listen(port, () => {
   console.log("App listening in this port : ", port);

@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 const sessionClient = new PrismaClient().session;
 const userClient = new PrismaClient().user;
 
-export const getSessionById = async (req, res) => {
+export const findSessionById = async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
 
@@ -14,11 +14,18 @@ export const getSessionById = async (req, res) => {
 
     const sessionId = authHeader.split(" ")[1];
 
-    const session = await sessionClient.findFirst({ where: { id: sessionId } });
+    const session = await sessionClient.findFirst({
+      where: { id: sessionId },
+      include: { user: true },
+    });
 
-    res.status(200).json({ data: session });
+    if (session) return session;
+
+    return null;
+    // res.status(200).json({ data: session });
   } catch (error) {
     console.log(error);
+    return null;
   }
 };
 
@@ -51,9 +58,9 @@ export const createSession = async (req, res) => {
       },
     });
 
-    console.log("session : ", session);
-
-    res.status(200).json({ data: session });
+    res
+      .status(200)
+      .json({ data: { sessionId: session.id, email: session.user.email } });
   } catch (error) {
     console.log(error);
   }
