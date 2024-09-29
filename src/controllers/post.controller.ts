@@ -15,6 +15,7 @@ export const getAllPosts = async (req, res) => {
     }
 
     // Get the page and pageSize from the request query params
+    const email = req.query.email; // Default to page 1 if not provided
     const page = parseInt(req.query.page) || 1; // Default to page 1 if not provided
     const pageSize = parseInt(req.query.pageSize) || 10; // Default to 10 items per page if not provided
 
@@ -26,6 +27,8 @@ export const getAllPosts = async (req, res) => {
         id: true,
         body: true,
         image: true,
+        createdDate: true,
+        lastModifiedDate: true,
         author: {
           select: {
             name: true,
@@ -36,6 +39,9 @@ export const getAllPosts = async (req, res) => {
       },
       skip: skip,
       take: pageSize,
+      ...(email && {
+        where: { author: { email } },
+      }),
     });
 
     // Get the total count of posts (for calculating total pages)
@@ -60,8 +66,31 @@ export const getAllPosts = async (req, res) => {
 
 export const getPostById = async (req, res) => {
   try {
+    const isLoggedIn = await findSessionById(req, res);
+
+    if (!isLoggedIn) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
     const postId = req.params.id;
-    const post = await postClient.findFirst({ where: { id: postId } });
+    const post = await postClient.findFirst({
+      where: { id: postId },
+      select: {
+        author: {
+          select: {
+            email: true,
+            name: true,
+            profilePicture: true,
+          },
+        },
+        body: true,
+        comments: true,
+        createdDate: true,
+        id: true,
+        image: true,
+        lastModifiedDate: true,
+      },
+    });
 
     res.status(200).json({ data: post });
   } catch (error) {
@@ -94,36 +123,48 @@ export const createPost = async (req, res) => {
   }
 };
 
-export const updateUser = async (req, res) => {
+export const deletePostById = async (req, res) => {
   try {
-    const authHeader = req.headers.authorization;
+    const isLoggedIn = await findSessionById(req, res);
 
-    if (!authHeader) {
-      return res.status(401).json({ message: "Authorization header missing" });
+    if (!isLoggedIn) {
+      return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const sessionId = authHeader.split(" ")[1];
-    if (!sessionId) return res.status(401).json({ message: "Token missing" });
-
-    const session = await sessionClient.findFirst({ where: { id: sessionId } });
-    if (!session) {
-      return res.status(401).json({ message: "Authorization failed" });
-    }
-
-    const email = req.body.email;
-    const name = req.body.name;
-    const password = req.body.password;
-
-    const saltRounds = 10;
-    const salt = await bcrypt.genSalt(saltRounds);
-    const hashPassword = await bcrypt.hash(password, salt);
-
-    const user = await userClient.update({
-      data: { email, name, password: hashPassword },
-      where: { id: session.userId },
+    const postId = req.params.id;
+    const post = await postClient.delete({
+      where: { id: postId },
     });
 
-    res.status(200).json({ data: user });
+    res.status(200).json({ data: "Success" });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const putPostById = async (req, res) => {
+  try {
+    const isLoggedIn = await findSessionById(req, res);
+
+    if (!isLoggedIn) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const postId = req.params.id;
+
+    const body = req.body.body;
+    const image = req.body.image;
+
+    await postClient.update({
+      where: { id: postId },
+      data: {
+        body,
+        image: image.length > 0 ? image : null,
+        authorId: isLoggedIn.userId,
+      },
+    });
+
+    res.status(200).json({ data: "Success" });
   } catch (error) {
     console.log(error);
   }
