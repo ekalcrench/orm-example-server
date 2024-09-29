@@ -1,9 +1,13 @@
 import { Router } from "express";
 
-import { createSession } from "../controllers/session.controller";
+import {
+  createSession,
+  removeSession,
+} from "../controllers/session.controller";
 
 const sessionRouter = Router();
 
 sessionRouter.post("/login", createSession);
+sessionRouter.post("/logout", removeSession);
 
 export default sessionRouter;

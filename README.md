@@ -20,5 +20,5 @@ The server is auto restart due to the package called `nodemon`.
 3. Create .env file that has DATABASE_URL=<connections/database_name>, you can see it in MongoDB Atlas for connections
 4. Download @prisma/client
 5. Create all model in schema.prisma file to make it easy, you can download prisma extension from VS Code
-6. Run using this command "npx prisma generate" to generate all the prisma model that has been created in schema.prisma file
-7. Run "npx prisma db push" if you have @unique fields in your model, so your database has a guard to has a unique value
+6. Run using this command "npx prisma generate" to generate all the prisma model that has been created in schema.prisma file locally
+7. Run "npx prisma db push" to synchronice your db with local schema

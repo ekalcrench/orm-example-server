@@ -8,19 +8,19 @@ generator client {
 }
 
 model User {
-  id       String    @id @default(auto()) @map("_id") @db.ObjectId
-  email    String    @unique
-  name     String
-  password String
-  posts    Post[]
-  Session  Session[]
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  email          String    @unique
+  name           String
+  password       String
+  profilePicture String?
+  posts          Post[]
+  Session        Session[]
 }
 
 model Post {
   id       String    @id @default(auto()) @map("_id") @db.ObjectId
-  title    String
   body     String
-  image    String
+  image    String?
   author   User      @relation(fields: [authorId], references: [id])
   authorId String    @db.ObjectId
   comments Comment[]

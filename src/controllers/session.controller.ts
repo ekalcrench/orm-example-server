@@ -29,6 +29,22 @@ export const findSessionById = async (req, res) => {
   }
 };
 
+export const getAllSession = async (req, res) => {
+  try {
+    const isLoggedIn = await findSessionById(req, res);
+
+    if (!isLoggedIn) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const session = await sessionClient.findMany();
+
+    res.status(200).json({ data: session });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 export const createSession = async (req, res) => {
   try {
     const email = req.body.email;
@@ -61,6 +77,26 @@ export const createSession = async (req, res) => {
     res
       .status(200)
       .json({ data: { sessionId: session.id, email: session.user.email } });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const removeSession = async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader) {
+      return res.status(401).json({ message: "Authorization header missing" });
+    }
+
+    const sessionId = authHeader.split(" ")[1];
+
+    await sessionClient.delete({
+      where: { id: sessionId },
+    });
+
+    res.status(200).json({ data: "Success" });
   } catch (error) {
     console.log(error);
   }
