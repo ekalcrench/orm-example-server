@@ -112,7 +112,7 @@ export const createPost = async (req, res) => {
     await postClient.create({
       data: {
         body,
-        image: image.length > 0 ? image : null,
+        image: image && image.length > 0 ? image : null,
         authorId: isLoggedIn.userId,
       },
     });
@@ -159,7 +159,7 @@ export const putPostById = async (req, res) => {
       where: { id: postId },
       data: {
         body,
-        image: image.length > 0 ? image : null,
+        image: image && image.length > 0 ? image : null,
         authorId: isLoggedIn.userId,
       },
     });
